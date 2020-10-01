@@ -24,8 +24,8 @@ namespace TokenData {
 }
 
 class Parser {
-    lex(code : String) : [Token]
-    parse(tokens : [Token]) : CompoundToken
+    lexTokens(code : String) : [Token]
+    parseAst(tokens : [Token]) : Token
 }
 
 class Compiler {

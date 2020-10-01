@@ -1,4 +1,4 @@
-module TokenData(SymbolTokenType, CompoundTokenType, Token) where
+module TokenData(SymbolTokenType(..), CompoundTokenType(..), Token(..)) where
 
 data SymbolTokenType =  Keyword         | Boolean       | IntType
                         | FloatingPoint | Character     | StringLiteral

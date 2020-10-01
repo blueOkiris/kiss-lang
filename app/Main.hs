@@ -2,6 +2,7 @@ module Main where
 
 import System.Environment(getArgs)
 import System.Directory(doesFileExist, doesDirectoryExist)
+import Parser(lexTokens, parseAst)
 
 main :: IO ()
 main = do
@@ -23,9 +24,13 @@ main = do
         
         if fileExists || (moduleExists && mainFileExists) then do
             let fileName =  if fileExists then (args !! 0)
-                            else if moduleExists then (args !! 0) ++ "/main.kiss"
+                            else if moduleExists then
+                                (args !! 0) ++ "/main.kiss"
                             else ""
+            
             codeStr <- readFile fileName
+            let tokens = lexTokens codeStr
+            let ast = parseAst tokens
             
             putStrLn("Done.")
         else
