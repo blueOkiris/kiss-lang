@@ -19,7 +19,8 @@ compileSource moduleName fileExists moduleExists = do
     let tokens = lexTokens codeStr
     let ast = parseAst tokens
     let cppCode = generateCode ast
-    let cppFileName = getCppFileName $ baseName moduleName
+    let folderName = replace (baseName moduleName) "" moduleName
+    let cppFileName = folderName ++ (getCppFileName $ baseName moduleName)
     compile cppFileName cppCode
 
 capitalize :: String -> String
