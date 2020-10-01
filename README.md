@@ -91,7 +91,8 @@ Compound Tokens:
                 | <bracket> <type-name> <bracket>
 
 <body>          := <brace> { <stmt> } <brace>
-<func-def>      := <keyword> <type-name> <ret-op> <type-name> <body>
+<func-def>      := <keyword> <identifier> <type-op> 
+                        <type-name> <ret-op> <type-name> <body>
 <loop>          := <keyword> <body>
 <cast>          := <double-arrow> <type-name> <double-arrow>
 <struct-def>    := <keyword> <brace> 

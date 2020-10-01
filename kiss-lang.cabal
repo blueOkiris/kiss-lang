@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4f4a23d9fbe8ce71482ac52d4fd24639da008c08c0f56ff4eb9b5e2766f18e5f
+-- hash: 954814cb1f47e3496775b1bed7238ba065fdb2e92562bce44343def4bcfb7c51
 
 name:           kiss-lang
 version:        0.1.0.0
@@ -33,6 +33,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , directory >=1.3.6.0
   default-language: Haskell2010
 
 executable smooch
@@ -44,5 +45,6 @@ executable smooch
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , directory >=1.3.6.0
     , kiss-lang
   default-language: Haskell2010
