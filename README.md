@@ -14,9 +14,7 @@ After building, the executable, `smooch` can be found in the folder `.stack-work
 
 ## Language Definition
 
-So first of all, kiss-lang is a statically typed language where all data is immutable. You can compose expressions through repeated function calls though.
-
-Instead of having a stack like snake-script, it is more like a functional language. Essentially, there is a stack of one position of arbitrary size, and operations to affect that value. Essentially, it can be empty (which may throw errors), or it can be a single value (or list) or a tuple. As you push more items, they get tupled. So like `1 2 3` becomes `(( 1 2 ) 3)` and you can convert to list and manipulate however you need.
+So first of all, kiss-lang is a statically typed language where all data is immutable. You can compose expressions through repeated function calls though. It will also still have a stack which will be implmented (when compiled to C++ code) as a vector containing a representation of the data as the object stored in the vector. All instructions pop one value off the top and push one value back on. However, a few stack functions will manage the stack such as moving an item from deep in the stack to the top, removing an item, duplicating an item, etc. It's purpose is for large-scale data manipulation like structs and stuff, but functions always modify just the top of the stack.
 
 It's very expressive despite this because of the list and tuple types, so instead of saying `2 x -` for getting the value of x and subtracting two, you'd say `(x 2) -` which would take the tuples and manipulate them.
 
@@ -85,8 +83,9 @@ Compound Tokens:
                     | <float>
 <tuple>         := <parenth> <type> <type> <parenth>
 <list>          := <bracket> [ <type> ] <bracket>
+<struct>        := <parenth> <identifier> <parenth> <brace> { <type> } <brace>
 <struct-access> := <identifier> [ <member-op> <identifier> ]
-<type>          := <raw-type> | <tuple> | <list> | <struct-access>
+<type>          := <raw-type> | <tuple> | <list> | <struct-access> | <struct>
 <type-name>     := <type-char> | <identifier>
                 | <parenth> <type-name> <type-name> <parenth>
                 | <bracket> <type-name> <bracket>
