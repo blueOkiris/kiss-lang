@@ -1,11 +1,12 @@
 module Parser(lexTokens, parseAst) where
 
-import TokenData(Token(..), CompoundTokenType(..))
+import TokenData(   Token(..), CompoundTokenType(..)
+                    , SymbolToken(..), CompoundToken(..) )
 
-lexTokens :: String -> [Token]
+lexTokens :: String -> [SymbolToken]
 lexTokens code =
     []
 
-parseAst :: [Token] -> Token
+parseAst :: [SymbolToken] -> CompoundToken
 parseAst tokens =
-    CompoundToken Program []
+    Compound Program []

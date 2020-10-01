@@ -1,4 +1,5 @@
-module TokenData(SymbolTokenType(..), CompoundTokenType(..), Token(..)) where
+module TokenData(   SymbolTokenType(..), CompoundTokenType(..)
+                    , Token(..), SymbolToken(..), CompoundToken(..) ) where
 
 data SymbolTokenType =  Keyword         | Boolean       | IntType
                         | FloatingPoint | Character     | StringLiteral
@@ -13,5 +14,6 @@ data CompoundTokenType =    RawType         | Tuple         | List
                             | Cast          | StructDef     | Stmt
                             | Program
 
-data Token =    SymbolToken SymbolTokenType String (Int, Int)
-                | CompoundToken CompoundTokenType [ Token ]
+data SymbolToken = Symbol SymbolTokenType String (Int, Int)
+data CompoundToken = Compound CompoundTokenType [Token]
+data Token = SymbolToken SymbolToken | CompoundToken CompoundToken

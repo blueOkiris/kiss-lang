@@ -24,13 +24,13 @@ namespace TokenData {
 }
 
 class Parser {
-    lexTokens(code : String) : [Token]
-    parseAst(tokens : [Token]) : Token
+    lexTokens(code : String) : [SymbolToken]
+    parseAst(tokens : [SymbolToken]) : CompoundToken
 }
 
 class Compiler {
     generateCode(ast : CompoundToken) : String
-    compile(code : String) : IO()
+    compile(outputFileName : String, code : String) : IO()
 }
 
 namespace IO {
