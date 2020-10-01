@@ -5,7 +5,7 @@ namespace TokenData {
     
     class SymbolToken {
         type : SymbolTokenType
-        text : Value
+        text : String
         position : (Int, Int)
     }
 
