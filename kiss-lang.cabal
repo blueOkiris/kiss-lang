@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 380002e39d63b4f8411e10d77caeadad13c4acd43ad9c6a8cf894ee8ef7766b9
+-- hash: 4f4a23d9fbe8ce71482ac52d4fd24639da008c08c0f56ff4eb9b5e2766f18e5f
 
 name:           kiss-lang
 version:        0.1.0.0
@@ -23,6 +23,10 @@ source-repository head
   location: https://github.com/blueOkiris/kiss-lang
 
 library
+  exposed-modules:
+      Compiler
+      Parser
+      TokenData
   other-modules:
       Paths_kiss_lang
   hs-source-dirs:
