@@ -1,0 +1,56 @@
+@startuml kiss-lang-domain
+
+namespace TokenData {
+    class Token
+    
+    class SymbolToken {
+        type : SymbolTokenType
+        text : Value
+        position : (Int, Int)
+    }
+
+    class CompoundToken {
+        type : CompoundTokenType
+        children : Token
+    }
+    
+    enum SymbolTokenType
+    enum CompoundTokenType
+    
+    SymbolToken -u-|> Token
+    CompoundToken -u-|> Token
+    SymbolToken --> SymbolTokenType
+    CompoundToken --> CompoundTokenType
+}
+
+class Parser {
+    lex(code : String) : [Token]
+    parse(tokens : [Token]) : CompoundToken
+}
+
+class Compiler {
+    generateCode(ast : CompoundToken) : String
+    compile(code : String) : IO()
+}
+
+namespace IO {
+    class Files
+    class Console
+}
+
+class Main {
+    main : IO()
+}
+
+Compiler --> IO.Files
+Compiler --> TokenData.CompoundToken
+Parser ..> TokenData.Token
+Parser --> TokenData.Token
+Parser ..> TokenData.CompoundToken
+
+Main --> Compiler
+Main --> Parser
+Main --> IO.Files
+Main --> IO.Console
+
+@enduml
