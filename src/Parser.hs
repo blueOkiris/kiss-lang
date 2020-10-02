@@ -9,6 +9,7 @@ import Text.RegexPR(matchRegexPR)
 import TokenData(   Token(..), CompoundTokenType(..), SymbolTokenType(..)
                     , SymbolToken(..), CompoundToken(..) )
 
+-- Set of all symbol regexs. Must be in the right order (see below)
 lexerRegexs :: [(SymbolTokenType, String)]
 lexerRegexs =
     [ (Keyword,         "loop|func|import|struct")
@@ -29,6 +30,10 @@ lexerRegexs =
     , (TypeOp,          "::")
     , (MemberOp,        "\\.") ]
 
+{- Find the first regex (in order) that applies to the START of the string
+ - This can only work if the regexs don't overlap.
+ - So basically don't call /\?/ before /\?\?/
+ - because otherwise you'll lex [ ?, ? ] instead of [ ?? ] -}
 getFirstMatch :: String -> Int -> (SymbolTokenType, String)
 getFirstMatch code matchIndex
     | matchIndex >= length lexerRegexs = (NoSymbol, "")
@@ -40,12 +45,16 @@ getFirstMatch code matchIndex
         match = matchRegexPR regex code 
         matchStr =  if (isJust match) then fst $ fst $ fromJust match else ""
 
+{- Take the current string location, call the matching function,
+ - and return the new token as well as how far to move in code
+ - to pass the found token -}
 lexToken :: String -> Int -> (Int, Int) -> (SymbolToken, Int)
 lexToken code index position =
     (Symbol tokenType matchStr position, index + (length matchStr))
     where
         (tokenType, matchStr) = getFirstMatch (drop index code) 0
 
+-- Move through the code, parsing tokens and skipping whitespace
 lexTokensCore :: [SymbolToken] -> String -> Int -> (Int, Int) -> [SymbolToken]
 lexTokensCore current code index (line, col)
     | (index < (length code)) && (isSpace currChar) =
