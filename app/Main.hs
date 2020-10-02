@@ -18,11 +18,13 @@ compileSource moduleName fileExists moduleExists = do
     codeStr <- readFile fileName
     let tokens = lexTokens codeStr
     let ast = parseAst tokens
+    putStrLn $ show ast
     let cppCode = generateCode ast
     let folderName = replace (baseName moduleName) "" moduleName
     let cppFileName = folderName ++ (getCppFileName $ baseName moduleName)
     compile cppFileName cppCode
 
+-- Helper string functions
 capitalize :: String -> String
 capitalize (head:tail) = toUpper head : map toLower tail
 capitalize [] = []

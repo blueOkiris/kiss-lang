@@ -1,7 +1,7 @@
 module Parser(lexTokens, parseAst) where
 
 import Debug.Trace(trace)
-import Data.Maybe(fromJust, isJust)
+import Data.Maybe(fromJust, isJust, Maybe(..))
 import Data.List(isPrefixOf)
 import Data.String.Utils(replace)
 import Data.Char(isSpace)
@@ -74,6 +74,82 @@ lexTokens :: String -> [SymbolToken]
 lexTokens code =
     lexTokensCore [] code 0 (1, 1)
 
+-- <type> := <raw-type> | <tuple> | <list> | <struct-access> | <struct>
+parseType :: [SymbolToken] -> Int -> ((Maybe CompoundToken), Int)
+parseType tokens index =
+    (Just (Compound Type []), index + 1)
+
+{- <func-def> :=
+ -      <keyword> <identifier>
+ -      <type-op> <type-name> <ret-op> <type-name> <body> -}
+parseFuncDef :: [SymbolToken] -> Int -> ((Maybe CompoundToken), Int)
+parseFuncDef tokens index =
+    (Just (Compound FuncDef []), index + 1)
+
+-- <loop> := <keyword> <body>
+parseLoop :: [SymbolToken] -> Int -> ((Maybe CompoundToken), Int)
+parseLoop tokens index =
+    (Just (Compound Loop []), index + 1)
+
+-- <cast> := <double-arrow> <type-name> <double-arrow>
+parseCast :: [SymbolToken] -> Int -> ((Maybe CompoundToken), Int)
+parseCast tokens index =
+    (Just (Compound Cast []), index + 1)
+
+-- <operator> := /\+|-|\/|%|\+\+|--|==|!=|>|<|>=|<=|&&|\|\||!|&|\^|~|=/
+parseOperator :: [SymbolToken] -> Int -> ((Maybe SymbolToken), Int)
+parseOperator tokens index =
+    (Just $ tokens !! index, index + 1)
+
+{- <struct-def> := 
+ -      <keyword> <brace> { <identifier> <type-op> <type-name> } <brace> -}
+parseStructDef :: [SymbolToken] -> Int -> ((Maybe CompoundToken), Int)
+parseStructDef tokens index =
+    (Just (Compound StructDef []), index + 1)
+
+-- <stmt> := <type> | <func-def> | <loop> | <cast> | <operator> | <struct-def>
+parseStmt :: [SymbolToken] -> Int -> ((Maybe CompoundToken), Int)
+parseStmt tokens index
+    | isJust typeMaybe =
+        (Just (Compound Stmt [ CompoundToken $ fromJust typeMaybe ]),
+            typeNewIndex)
+    | isJust funcDefMaybe =
+        (Just (Compound Stmt [ CompoundToken $ fromJust funcDefMaybe ]),
+            funcDefNewIndex)
+    | isJust loopMaybe =
+        (Just (Compound Stmt [ CompoundToken $ fromJust loopMaybe ]),
+            loopNewIndex)
+    | isJust castMaybe =
+        (Just (Compound Stmt [ CompoundToken $ fromJust castMaybe ]),
+            castNewIndex)
+    | isJust operatorMaybe =
+        (Just (Compound Stmt [ SymbolToken $ fromJust operatorMaybe ]),
+            operatorNewIndex)
+    | isJust structDefMaybe =
+        (Just (Compound Stmt [ CompoundToken $ fromJust structDefMaybe ]),
+            structDefNewIndex)
+    | otherwise = (Just (Compound Stmt []), index + 1)
+    where
+        (typeMaybe, typeNewIndex) = parseType tokens index
+        (funcDefMaybe, funcDefNewIndex) = parseFuncDef tokens index
+        (loopMaybe, loopNewIndex) = parseLoop tokens index
+        (castMaybe, castNewIndex) = parseCast tokens index
+        (operatorMaybe, operatorNewIndex) = parseOperator tokens index
+        (structDefMaybe, structDefNewIndex) = parseStructDef tokens index
+
+-- <program> := [ <stmt> ]
+parseProgram :: [SymbolToken] -> Int -> [Token] -> [Token]
+parseProgram tokens index current
+    | index >= length tokens = []
+    | isJust stmtMaybe =  parseProgram tokens newIndex (current ++ [stmt])
+    | otherwise =  parseProgram tokens (index + 1) current
+    where
+        (stmtMaybe, newIndex) = parseStmt tokens index
+        stmt =  if isJust stmtMaybe then
+                    CompoundToken $ fromJust stmtMaybe
+                else 
+                    CompoundToken $ Compound Stmt []
+
 parseAst :: [SymbolToken] -> CompoundToken
 parseAst tokens =
-    Compound Program []
+    Compound Program $ parseProgram tokens 0 []
