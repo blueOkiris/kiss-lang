@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b55019c545cef7d030fab6ac5706685b2f6f1a8fd05e3104f330976d805f4d3e
+-- hash: 70f34d594e6f2e398fd55e1864c385c0c19ca3ad031a188be93774a740aaeef6
 
 name:           kiss-lang
 version:        0.1.0.0
@@ -37,6 +37,7 @@ library
     , directory
     , filepath
     , parseargs
+    , regexpr
   default-language: Haskell2010
 
 executable smooch
@@ -53,4 +54,5 @@ executable smooch
     , filepath
     , kiss-lang
     , parseargs
+    , regexpr
   default-language: Haskell2010

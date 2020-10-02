@@ -6,14 +6,18 @@ data SymbolTokenType =  Keyword         | Boolean       | IntType
                         | TypeChar      | Identifier    | Parenth
                         | Bracket       | Brace         | ReturnOp
                         | DoubleArrow   | Operator      | TypeOp
-                        | MemberOp
+                        | MemberOp      | NoSymbol
+                        deriving(Show)
 
 data CompoundTokenType =    RawType         | Tuple         | List
                             | StructAccess  | Type          | TypeName
                             | Body          | FuncDef       | Loop
                             | Cast          | StructDef     | Stmt
-                            | Program
+                            | Program       | NoCompound
+                            deriving(Show)
 
-data SymbolToken = Symbol SymbolTokenType String (Int, Int)
-data CompoundToken = Compound CompoundTokenType [Token]
-data Token = SymbolToken SymbolToken | CompoundToken CompoundToken
+data SymbolToken = Symbol SymbolTokenType String (Int, Int) deriving(Show)
+data CompoundToken = Compound CompoundTokenType [Token] deriving(Show)
+data Token =    SymbolToken SymbolToken 
+                | CompoundToken CompoundToken
+                deriving(Show)
