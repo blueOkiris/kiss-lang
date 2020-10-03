@@ -59,7 +59,7 @@ With all of that said, here's the ebnf.
 Symbol Tokens:
 
 ```
-<keyword>       := /loop|func|import|struct/
+<keyword>       := /loop|func|struct/
 <boolean>       := /true|false/
 <integer>       := /([0-9]+|0x[0-9A-Za-z]+|0b[01]+):[1248]/
 <float>         := /([0-9]+\.[0-9]*|\.[0-9]+):[48]/
