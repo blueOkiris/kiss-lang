@@ -6,12 +6,12 @@
 using namespace kisslang;
 
 SymbolToken::SymbolToken(
-        SymbolTokenType type, std::string value,
-        std::pair<int, int> position) :
+        const SymbolTokenType &type, const std::string &value,
+        const std::pair<int, int> &position) :
         type(type), value(value), position(position) {
 }
 
 CompoundToken::CompoundToken(
-        CompoundTokenType type, std::vector<Token> children) :
+        const CompoundTokenType &type, const std::vector<Token> &children) :
         type(type), children(children) {
 }
