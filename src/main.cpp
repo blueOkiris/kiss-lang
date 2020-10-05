@@ -10,7 +10,7 @@ using namespace kisslang;
 const int sourceCodeFromArgs(
     std::string &code, std::string &moduleName, int argc, char **args
 );
-const int compileSource(
+const int compileSourceCode(
     const std::string &source, const std::string &moduleName
 );
 const std::string replace(
@@ -23,10 +23,10 @@ int main(int argc, char **args) {
     if(!sourceCodeFromArgs(sourceCode, moduleName, argc, args)) {
         return -1;
     }
-    return compileSource(sourceCode, moduleName);
+    return compileSourceCode(sourceCode, moduleName);
 }
 
-const int compileSource(
+const int compileSourceCode(
         const std::string &source, const std::string &moduleName) {
     try {
         const auto tokens = Parser::lexTokens(source);
