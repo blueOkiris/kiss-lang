@@ -102,6 +102,52 @@ Compound Tokens:
 <program>       := [ <stmt> ]
 ```
 
+## Novel Parser Design
+
+So I had this idea. I'm using regular expressions and looping through the list until I find one that matches the current index of the code as I iterate through it (this gets around some of the issues of using regular expressions for lexer). What if I applied that to the parser?
+
+The way it works is instead of ebnf tags, I assign each token a character. Then I can define compound tokens as regular expressions as well. I can loop through all the rules, and match and replace as many times as possible, and then check if everything is a statement. If not then I can loop again, over and over and over again. If nothing changes in an iteration, but we're not at all statements, then there's an error.
+
+So the lexer works the same getting a set of symbol tokens (which have a source, a position, and a character)
+
+So here's the symbol tokens ebnf with the characters:
+```
+ k : <keyword>      := /loop|func|struct/
+ b : <boolean>       := /true|false/
+ i : <integer>       := /([0-9]+|0x[0-9A-Za-z]+|0b[01]+):[1248]/
+ f : <float>         := /([0-9]+\.[0-9]*|\.[0-9]+):[48]/
+ c : <character>     := /0c(\\.|[^\\])/
+ ' : <string>        := /'(\\.|[^\\'])*'/
+ @ : <type-char>     := /#:[1248]|\.:[48]|@|\?/
+ n : <identifier>    := /[A-Za-z_][A-Za-z_0-9]*/
+ ( : <parenth>       := /\(|\)/
+ [ : <bracket>       := /\[\]/
+ { : <brace>         := /\{\}/
+ > : <ret-op>        := /->/
+ < : <double-arrow>  := /<<|>>/
+ = : <operator>      := /\+|-|\/|%|\+\+|--|==|!=|>|<|>=|<=|&&|\|\||!|&|\^|~|=/
+ : : <type-op>       := /::/
+ . : <member-op>     := /\./
+```
+
+```
+ r : <raw-type>      := /[bic'nf]/
+ , : <tuple>         := /\(tt\(/
+ l : <list>          := /\[t+\[/
+ s : <struct>        := /\(n\(\{t*\{/
+ S : <struct-access> := /n(\.n)+/
+ t : <type>          := /[r,lsS]/
+ N : <type-name>     := /[@n]|(\(NN\()|(\[N\[)/
+
+ } : <body>          := /\{I*\{/
+ F : <func-def>      := /kn:N>N\}/
+ L : <loop>          := /k\}/
+ a : <cast>          := /<N</
+ d : <struct-def>    := /k\{(n:N)*\{/
+ I : <stmt>          := /[tFLa=d]/
+<program>            := /s+/
+```
+
 ## Compiler Domain Diagram
 
 I'm using Haskell, not an OOP language, but classes without private state can act as modules containing functions and thus translate directly to functional code structure (or possibly a type)
