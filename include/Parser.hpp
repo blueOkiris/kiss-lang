@@ -2,6 +2,8 @@
 
 #include <string>
 #include <vector>
+#include <regex>
+#include <map>
 #include <Token.hpp>
 
 /*
@@ -10,7 +12,7 @@
  * Just simple module encapsulation instead
  */
 namespace kisslang {
-    namespace Parser {
+    namespace Parser {        
         const std::vector<SymbolToken> lexTokens(const std::string &code);
         const CompoundToken parseAst(const std::vector<SymbolToken> &tokens);
     }
