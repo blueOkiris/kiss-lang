@@ -34,7 +34,7 @@ namespace kisslang {
         TypeChar = '@',     Identifier = 'n',   Parenth = '(', 
         Bracket = '[',      Brace = '{',        ReturnOp = '>',
         DoubleArrow = '<',  Operator = '=',     TypeOp = ':',
-        MemberOp = '.',
+        MemberOp = '.',     Dollar = '$',
         
         None = '?'
     };

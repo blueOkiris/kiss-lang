@@ -51,7 +51,7 @@ const std::string CompoundToken::str() const {
     tokenStr << "{ " << static_cast<char>(type) << " : [ ";
     for(auto it = children.begin(); it != children.end(); ++it) {
         tokenStr << (*it)->str();
-        if(it != children.end()) {
+        if(it != children.end() - 1) {
             tokenStr << ", ";
         }
     }

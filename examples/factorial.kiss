@@ -1,8 +1,8 @@
-func factorial :: # -> # {
-    dup 1 == loop {
+func factorial :: #:4 -> #:4 {
+    dup 1:4 == loop {
         return
     }
-    dup 1 - factorial * return
+    dup 1:4 - factorial * return
 }
 
 input <<[@]>> factorial

@@ -59,47 +59,48 @@ With all of that said, here's the ebnf.
 Symbol Tokens:
 
 ```
-<keyword>       := /loop|func|struct/
-<boolean>       := /true|false/
-<integer>       := /([0-9]+|0x[0-9A-Za-z]+|0b[01]+):[1248]/
-<float>         := /([0-9]+\.[0-9]*|\.[0-9]+):[48]/
-<character>     := /0c(\\.|[^\\])/
-<string>        := /'(\\.|[^\\'])*'/
-<type-char>     := /#:[1248]|\.:[48]|@|\?/
-<identifier>    := /[A-Za-z_][A-Za-z_0-9]*/
-<parenth>       := /\(|\)/
-<bracket>       := /\[\]/
-<brace>         := /\{\}/
-<ret-op>        := /->/
-<double-arrow>  := /<<|>>/
-<operator>      := /\+|-|\/|%|\+\+|--|==|!=|>|<|>=|<=|&&|\|\||!|&|\^|~|=/
-<type-op>       := /::/
-<member-op>     := /\./
+<keyword>       ::= /loop|func|struct/
+<boolean>       ::= /true|false/
+<integer>       ::= /([0-9]+|0x[0-9A-Za-z]+|0b[01]+):[1248]/
+<float>         ::= /([0-9]+\.[0-9]*|\.[0-9]+):[48]/
+<character>     ::= /0c(\\.|[^\\])/
+<string>        ::= /'(\\.|[^\\'])*'/
+<type-char>     ::= /#:[1248]|\.:[48]|@|\?/
+<identifier>    ::= /[A-Za-z_][A-Za-z_0-9]*/
+<parenth>       ::= /\(|\)/
+<bracket>       ::= /\[\]/
+<brace>         ::= /\{\}/
+<ret-op>        ::= /->/
+<double-arrow>  ::= /<<|>>/
+<operator>      ::= /\+|-|\*|\/|%|\+\+|--|==|!=|>|<|>=|<=|&&|\|\||!|&|\^|~|=/
+<type-op>       ::= /::/
+<dollar-sign>   ::= /\$/
+<member-op>     ::= /\./
 ```
 
 Compound Tokens:
 ```
-<raw-type>      := <boolean> | <integer> | <character> | <string> | <identifier>
+<raw-type>      ::= <boolean> | <integer> | <character> | <string> | <identifier>
                     | <float>
-<tuple>         := <parenth> <type> <type> <parenth>
-<list>          := <bracket> [ <type> ] <bracket>
-<struct>        := <parenth> <identifier> <parenth> <brace> { <type> } <brace>
-<struct-access> := <identifier> [ <member-op> <identifier> ]
-<type>          := <raw-type> | <tuple> | <list> | <struct-access> | <struct>
-<type-name>     := <type-char> | <identifier>
+<tuple>         ::= <parenth> <type> <type> <parenth>
+<list>          ::= <bracket> [ <type> ] <bracket>
+<struct>        ::= <parenth> <identifier> <parenth> <brace> { <type> } <brace>
+<struct-access> ::= <identifier> [ <member-op> <identifier> ]
+<type>          ::= <raw-type> | <tuple> | <list> | <struct-access> | <struct>
+<type-name>     ::= <type-char> | <dollar-sign> <identifier>
                 | <parenth> <type-name> <type-name> <parenth>
                 | <bracket> <type-name> <bracket>
 
-<body>          := <brace> { <stmt> } <brace>
-<func-def>      := <keyword> <identifier> <type-op> 
+<body>          ::= <brace> { <stmt> } <brace>
+<func-def>      ::= <keyword> <identifier> <type-op> 
                         <type-name> <ret-op> <type-name> <body>
-<loop>          := <keyword> <body>
-<cast>          := <double-arrow> <type-name> <double-arrow>
-<struct-def>    := <keyword> <brace> 
+<loop>          ::= <keyword> <body>
+<cast>          ::= <double-arrow> <type-name> <double-arrow>
+<struct-def>    ::= <keyword> <brace> 
                         { <identifier> <type-op> <type-name> } <brace>
-<stmt>          := <type> | <func-def> | <loop> | <cast> | <operator>
+<stmt>          ::= <type> | <func-def> | <loop> | <cast> | <operator>
                 | <struct-def>
-<program>       := [ <stmt> ]
+<program>       ::= [ <stmt> ]
 ```
 
 ## Novel Parser Design
@@ -112,40 +113,40 @@ So the lexer works the same getting a set of symbol tokens (which have a source,
 
 So here's the symbol tokens ebnf with the characters:
 ```
- k : <keyword>      := /loop|func|struct/
- b : <boolean>       := /true|false/
- i : <integer>       := /([0-9]+|0x[0-9A-Za-z]+|0b[01]+):[1248]/
- f : <float>         := /([0-9]+\.[0-9]*|\.[0-9]+):[48]/
- c : <character>     := /0c(\\.|[^\\])/
- ' : <string>        := /'(\\.|[^\\'])*'/
- @ : <type-char>     := /#:[1248]|\.:[48]|@|\?/
- n : <identifier>    := /[A-Za-z_][A-Za-z_0-9]*/
- ( : <parenth>       := /\(|\)/
- [ : <bracket>       := /\[\]/
- { : <brace>         := /\{\}/
- > : <ret-op>        := /->/
- < : <double-arrow>  := /<<|>>/
- = : <operator>      := /\+|-|\/|%|\+\+|--|==|!=|>|<|>=|<=|&&|\|\||!|&|\^|~|=/
- : : <type-op>       := /::/
- . : <member-op>     := /\./
+ k : <keyword>       ::= /loop|func|struct/
+ b : <boolean>       ::= /true|false/
+ i : <integer>       ::= /([0-9]+|0x[0-9A-Za-z]+|0b[01]+):[1248]/
+ f : <float>         ::= /([0-9]+\.[0-9]*|\.[0-9]+):[48]/
+ c : <character>     ::= /0c(\\.|[^\\])/
+ ' : <string>        ::= /'(\\.|[^\\'])*'/
+ @ : <type-char>     ::= /#:[1248]|\.:[48]|@|\?/
+ n : <identifier>    ::= /[A-Za-z_][A-Za-z_0-9]*/
+ ( : <parenth>       ::= /\(|\)/
+ [ : <bracket>       ::= /\[\]/
+ { : <brace>         ::= /\{\}/
+ > : <ret-op>        ::= /->/
+ < : <double-arrow>  ::= /<<|>>/
+ = : <operator>      ::= /\+|-|\*|\/|%|\+\+|--|==|!=|>|<|>=|<=|&&|\|\||!|&|\^|~|=/
+ : : <type-op>       ::= /::/
+ $ : <type-op>       ::= /\$/
+ . : <member-op>     ::= /\./
 ```
 
 ```
- r : <raw-type>      := /[bic'nf]/
- , : <tuple>         := /\(tt\(/
- l : <list>          := /\[t+\[/
- s : <struct>        := /\(n\(\{t*\{/
- S : <struct-access> := /n(\.n)+/
- t : <type>          := /[r,lsS]/
- N : <type-name>     := /[@n]|(\(NN\()|(\[N\[)/
-
- } : <body>          := /\{I*\{/
- F : <func-def>      := /kn:N>N\}/
- L : <loop>          := /k\}/
- a : <cast>          := /<N</
- d : <struct-def>    := /k\{(n:N)*\{/
- I : <stmt>          := /[tFLa=d]/
-<program>            := /s+/
+ r : <raw-type>      ::= /[bic'f]/
+ , : <tuple>         ::= /\(tt\(/
+ l : <list>          ::= /\[t+\[/
+ s : <struct>        ::= /\(n\(\{t*\{/
+ S : <struct-access> ::= /n(\.n)+/
+ N : <type-name>     ::= /@|\$|(\(NN\()|(\[N\[)/
+ F : <func-def>      ::= /kn:N>N\}/
+ t : <type>          ::= /[r,lsSn]/
+ } : <body>          ::= /\{[tFLa=dn]*\{/
+ L : <loop>          ::= /k\}/
+ a : <cast>          ::= /<N</
+ d : <struct-def>    ::= /k\{(n:N)*\{/
+<stmt>               ::= /[tFLa=dn]/
+<program>            ::= /s+/
 ```
 
 ## Compiler Domain Diagram

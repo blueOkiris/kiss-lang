@@ -1,6 +1,6 @@
-input <<#>>
-dup 1 == loop {
+input <<#:1>>
+dup 1:1 == loop {
     dup print
-    dup 1 ==
+    dup 1:1 ==
 }
 print '\n' print

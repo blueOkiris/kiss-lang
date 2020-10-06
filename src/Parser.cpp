@@ -26,31 +26,31 @@ static const std::vector<std::pair<std::string, SymbolTokenType>>
     { "[A-Za-z_][A-Za-z_0-9]*",             SymbolTokenType::Identifier },
     { "\\(|\\)",                            SymbolTokenType::Parenth },
     { "\\[|\\]",                            SymbolTokenType::Bracket },
-    { "\\{\\}",                             SymbolTokenType::Brace },
+    { "\\{|\\}",                            SymbolTokenType::Brace },
     { "->",                                 SymbolTokenType::ReturnOp },
     { "<<|>>",                              SymbolTokenType::DoubleArrow },
     {
-        "\\+|-|\\/|%|\\+\\+|--|==|!=|>|<|>=|<=|&&|\\|\\||!|&|\\^|~|=",
+        "\\+|-|\\*|\\/|%|\\+\\+|--|==|!=|>|<|>=|<=|&&|\\|\\||!|&|\\^|~|=",
         SymbolTokenType::Operator
     },
+    { "\\$",                                SymbolTokenType::Dollar },
     { "::",                                 SymbolTokenType::TypeOp },
     { "\\.",                                SymbolTokenType::MemberOp }
 };
 static const std::vector<std::pair<std::string, CompoundTokenType>> 
         compoundRegexs = {
-    { "[bic'nf]",                   CompoundTokenType::RawType },
-    { "\\(tt\\(",                   CompoundTokenType::Tuple },
-    { "\\[t+\\[",                   CompoundTokenType::List },
-    { "\\(n\\(\\{t*\\{",            CompoundTokenType::Struct },
-    { "n(\\.n)+",                   CompoundTokenType::StructAccess },
-    { "[r,lsS]",                    CompoundTokenType::Type },
-    { "[@n]|(\\(NN\\()|(\\[N\\[)",  CompoundTokenType::TypeName },
-    { "\\{I*\\{",                   CompoundTokenType::Body },
-    { "kn:N>N",                     CompoundTokenType::FuncDef },
-    { "k\\}",                       CompoundTokenType::Loop },
-    { "<N<",                        CompoundTokenType::Cast },
-    { "k\\{(n:N)*\\{",              CompoundTokenType::StructDef },
-    { "[tFLa=d]",                   CompoundTokenType::Statement }
+    { "[bic'f]",                        CompoundTokenType::RawType },
+    { "\\(tt\\(",                       CompoundTokenType::Tuple },
+    { "\\[t+\\[",                       CompoundTokenType::List },
+    { "\\(n\\(\\{t*\\{",                CompoundTokenType::Struct },
+    { "n(\\.n)+",                       CompoundTokenType::StructAccess },
+    { "@|\\$n|(\\(NN\\()|(\\[N\\[)",    CompoundTokenType::TypeName },
+    { "kn:N>N\\}",                      CompoundTokenType::FuncDef },
+    { "[r,lsS]" ,                       CompoundTokenType::Type },
+    { "\\{[tFLa=nd]*\\{",               CompoundTokenType::Body },
+    { "k\\}",                           CompoundTokenType::Loop },
+    { "<N<",                            CompoundTokenType::Cast },
+    { "k\\{(n:N)*\\{",                  CompoundTokenType::StructDef }
 };
 
 const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
@@ -61,6 +61,7 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
             ++codeStrIter) {
         if(*codeStrIter == ' ' || *codeStrIter == '\t' 
                 || *codeStrIter == '\r') {
+            col++;
             continue;
         } else if(*codeStrIter == '\n') {
             line++;
@@ -86,8 +87,8 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
                             regexTokenPairIter->second, matchStr, { line, col }
                         )
                     );
-                    codeStrIter += matchStr.length();
-                    col += matchStr.length();
+                    codeStrIter += matchStr.length() - 1;
+                    col += matchStr.length() - 1;
                     break;
                 }
             }
@@ -102,7 +103,8 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
 
 inline const bool allStatements(const std::string &str) {
     for(const auto chr : str) {
-        if(chr != 'I') {
+        if(chr != 't' && chr != 'F' && chr != 'L' && chr != 'a' && chr != '='
+                && chr != 'd' && chr != 'n') {
             return false;
         }
     }

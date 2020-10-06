@@ -1,12 +1,12 @@
-[[(0'Hi')(1'Bye')(2'wut')][(4'Hi')(5'Bye')(6'wut')]]
+[[(0:1 'Hi') (1:1 'Bye') (2:1 'wut')] [(4:1 'Hi') (5:1 'Bye') (6:1 'wut')]]
 
-[ 0 1 2 3 4 5 6 ] dup dup
+[ 0:1 1:1 2:1 3:1 4:1 5:1 6:1 ] dup dup
 print '\n' print
 
-4 remove unzip zip
+4:1 remove unzip zip
 print '\n' print
 
-2 at
+2:1 at
 print '\n' print
 
 print '\n' print
