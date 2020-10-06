@@ -10,9 +10,9 @@
  */
 namespace kisslang {
     namespace Compiler {
-        const std::string generateCode(const CompoundToken ast);
+        const std::string generateCode(const CompoundToken &ast);
         void compile(
-            const std::string outputFileName, const std::string cppCode
+            const std::string &outputFileName, const std::string &cppCode
         );
     }
 }
