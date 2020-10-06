@@ -2,6 +2,8 @@
 #include <vector>
 #include <regex>
 #include <map>
+#include <iostream>
+#include <Error.hpp>
 #include <Token.hpp>
 #include <Parser.hpp>
 
@@ -48,7 +50,56 @@ static const std::map<std::string, CompoundTokenType> compoundRegexs = {
 };
 
 const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
-    return std::vector<SymbolToken>();
+    std::vector<SymbolToken> tokens;
+    int line = 1, col = 1;
+    for(auto codeIt = code.begin(); codeIt != code.end(); ++codeIt) {
+        if(*codeIt == ' ' || *codeIt == '\t' || *codeIt == '\r') {
+            continue;
+        } else if(*codeIt == '\n') {
+            line++;
+            col = 1;
+            continue;
+        }
+        
+        const auto currStr = std::string(codeIt, code.end());
+        bool foundMatches = false;
+        for(auto regexTokenPairIt = symbolRegexs.begin();
+                regexTokenPairIt != symbolRegexs.end(); ++regexTokenPairIt) {
+            std::smatch matches;
+            const auto regexStr = regexTokenPairIt->first;
+            const std::regex currRegex(regexStr);
+            foundMatches = std::regex_search(
+                currStr, matches, currRegex
+            );
+            if(foundMatches) {
+                const auto matchStr = matches[0].str();
+                
+                // If currStr."startswith"(first match string)
+                if(currStr.rfind(matchStr, 0) == 0) {
+                    tokens.push_back(
+                        SymbolToken(
+                            regexTokenPairIt->second, matchStr, { line, col }
+                        )
+                    );
+                    codeIt += matchStr.length();
+                    col += matchStr.length();
+                    break;
+                }
+            }
+        }
+        
+        if(!foundMatches) {
+            throw UnknownTokenException(line, col);
+        }
+        col++;
+    }
+    
+    std::cout << "Lexed Tokens: " << std::endl;
+    for(const auto token : tokens) {
+        std::cout << token.str() << std::endl;
+    }
+    
+    return tokens;
 }
 
 const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {

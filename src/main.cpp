@@ -2,6 +2,8 @@
 #include <fstream>
 #include <sstream>
 #include <streambuf>
+#include <sys/stat.h>
+#include <Error.hpp>
 #include <Parser.hpp>
 #include <Compiler.hpp>
 
@@ -16,11 +18,12 @@ const int compileSourceCode(
 const std::string replace(
     const std::string src, const std::string what, const std::string with
 );
+const bool isRegularFile(const std::string &path);
 
 int main(int argc, char **args) {
     std::string sourceCode;
     std::string moduleName;
-    if(!sourceCodeFromArgs(sourceCode, moduleName, argc, args)) {
+    if(sourceCodeFromArgs(sourceCode, moduleName, argc, args)) {
         return -1;
     }
     return compileSourceCode(sourceCode, moduleName);
@@ -28,13 +31,14 @@ int main(int argc, char **args) {
 
 const int compileSourceCode(
         const std::string &source, const std::string &moduleName) {
+    std::cout << "Compiling module " << moduleName << "." << std::endl;
     try {
         const auto tokens = Parser::lexTokens(source);
         const auto ast = Parser::parseAst(tokens);
         const auto cppCode = Compiler::generateCode(ast);
         Compiler::compile(moduleName, cppCode);
-    } catch(...) { // Will become more specified as actual errors are developed
-        std::cout << "An unknown error occurred." << std::endl;
+    } catch(const UnknownTokenException &ute) {
+        std::cout << ute.what() << std::endl;
         return -1;
     }
     return 0;
@@ -60,9 +64,11 @@ const int sourceCodeFromArgs(
     
     // Check if a valid file name or module name
     std::ifstream srcFile(args[1]);
-    bool isFile = srcFile.good();
+    bool isFile = srcFile.good() && isRegularFile(args[1]);
     bool isDir = false;
     if(!isFile) {
+        srcFile.close();
+        
         std::stringstream moduleFileName;
         moduleFileName << args[1] << "/main.kiss";
         srcFile.open(moduleFileName.str());
@@ -89,9 +95,10 @@ const int sourceCodeFromArgs(
     if(isFile) {
         moduleName = replace(std::string(args[1]), ".kiss", "");
     } else {
-        moduleName = std::string(args[1]) + ".kiss";
+        moduleName = std::string(args[1]);
     }
     code = src;
+    
     return 0;
 }
 
@@ -104,4 +111,10 @@ const std::string replace(
     auto newStr = std::string(src);
     newStr.replace(startPos, what.length(), with);
     return newStr;
+}
+
+const bool isRegularFile(const std::string &path) {
+    struct stat pathStat;
+    stat(path.c_str(), &pathStat);
+    return S_ISREG(pathStat.st_mode);
 }

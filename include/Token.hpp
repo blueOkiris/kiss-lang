@@ -19,7 +19,9 @@
  */ 
 namespace kisslang {
     
-    struct Token {};
+    struct Token {
+        virtual std::string str() const;
+    };
     
     enum class SymbolTokenType {
         Keyword = 'k',      Boolean = 'b',      Integer = 'i',
@@ -41,6 +43,7 @@ namespace kisslang {
             const SymbolTokenType &type, const std::string &value,
             const std::pair<int, int> &position
         );
+        std::string str() const override;
     };
     
     enum class CompoundTokenType {
@@ -58,7 +61,8 @@ namespace kisslang {
         const std::vector<Token> children;
         
         CompoundToken(
-            const CompoundTokenType &type, const std::vector<Token> &children
+            const CompoundTokenType &newType, const std::vector<Token> &tokens
         );
+        std::string str() const override;
     };
 }
