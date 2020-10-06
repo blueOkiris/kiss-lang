@@ -2,6 +2,7 @@
 
 #include <string>
 #include <exception>
+#include <Token.hpp>
 
 namespace kisslang {
     struct SmoochException : public std::exception {
@@ -19,6 +20,6 @@ namespace kisslang {
     };
     
     struct UnexpectedTokenException : public SmoochException {
-        UnexpectedTokenException(std::string tokenStr);
+        UnexpectedTokenException(const SymbolToken &token, std::string tokStr);
     };
 }

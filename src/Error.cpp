@@ -1,5 +1,6 @@
 #include <cstring>
 #include <string>
+#include <Token.hpp>
 #include <Error.hpp>
 
 using namespace kisslang;
@@ -27,8 +28,11 @@ UnknownTokenException::UnknownTokenException(int line, int col) :
         SmoochException("Unknown token", line, col) {
 }
 
-UnexpectedTokenException::UnexpectedTokenException(std::string tokenStr) :
+UnexpectedTokenException::UnexpectedTokenException(
+        const SymbolToken &token, std::string tokStr) :
         SmoochException(
-            "Unexpected token (see token str \"" + tokenStr + "\")", 0, 0
+            "Unexpected token \"" + token.str()
+                + "\" (see token string \"" + tokStr + "\")",
+            token.position.first, token.position.second
         ) {
 }

@@ -101,14 +101,15 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
     return tokens;
 }
 
-inline const bool allStatements(const std::string &str) {
-    for(const auto chr : str) {
+inline const long int nonStatementIndex(const std::string &str) {
+    for(long int ind = 0; ind < static_cast<long int>(str.length()); ind++) {
+        const auto chr = str[ind];
         if(chr != 't' && chr != 'F' && chr != 'L' && chr != 'a' && chr != '='
                 && chr != 'd' && chr != 'n') {
-            return false;
+            return ind;
         }
     }
-    return true;
+    return -1;
 }
 
 const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
@@ -121,7 +122,7 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
     }
     
     auto currTreeStr = Token::tokenListAsTypeStr(tokenTree);
-    while(!allStatements(currTreeStr)) {
+    while(nonStatementIndex(currTreeStr) != -1) {
         const auto oldStr = currTreeStr;
         
         for(auto regexTokenPairIter = compoundRegexs.begin();
@@ -158,7 +159,17 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
         }
         
         if(currTreeStr == oldStr) {
-            throw UnexpectedTokenException(currTreeStr);
+            std::shared_ptr<Token> currToken = tokenTree.at(
+                nonStatementIndex(currTreeStr)
+            );
+            while(!currToken->isSymbol()) {
+                currToken = std::dynamic_pointer_cast<CompoundToken>(
+                    currToken
+                )->children[0];
+            }
+            auto symbolPtr = std::dynamic_pointer_cast<SymbolToken>(currToken);
+            const auto symbol = *symbolPtr;
+            throw UnexpectedTokenException(symbol, currTreeStr);
         }
     }
     
