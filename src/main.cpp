@@ -10,12 +10,11 @@ using namespace kisslang;
 inline void compileSourceCode(
         const std::string &source, const std::string &moduleName) {
     const auto tokens = Parser::lexTokens(source);
-    
-    const auto ast = Parser::parseAst(tokens);
-    std::cout << ast.str() << std::endl;
-    
+    const auto ast = Parser::parseAst(tokens);    
     const auto cppCode = Compiler::generateCode(ast);
     Compiler::compile(moduleName, cppCode);
+    
+    std::cout << ast.str() << std::endl;
 }
 
 int main(int argc, char **args) {
