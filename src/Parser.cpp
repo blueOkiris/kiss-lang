@@ -53,19 +53,25 @@ static const std::vector<std::pair<std::string, CompoundTokenType>>
     { "k\\{(n:N)*\\{",                  CompoundTokenType::StructDef }
 };
 
+inline bool shouldSkipSpaces(const char &chr, int &lineRef, int &colRef) {
+    if(chr == ' ' || chr == '\t' || chr == '\r') {
+        colRef++;
+        return true;
+    } else if(chr == '\n') {
+        lineRef++;
+        colRef = 1;
+        return true;
+    }
+    return false;
+}
+
 const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
     std::vector<SymbolToken> tokens;
     int line = 1, col = 1;
     for(auto codeStrIter = code.begin();
             codeStrIter != code.end();
             ++codeStrIter) {
-        if(*codeStrIter == ' ' || *codeStrIter == '\t' 
-                || *codeStrIter == '\r') {
-            col++;
-            continue;
-        } else if(*codeStrIter == '\n') {
-            line++;
-            col = 1;
+        if(shouldSkipSpaces(*codeStrIter, line, col)) {
             continue;
         }
         
@@ -93,6 +99,7 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
                 }
             }
         }
+        
         if(!foundMatches) {
             throw UnknownTokenException(line, col);
         }
@@ -110,6 +117,36 @@ inline const long int nonStatementIndex(const std::string &str) {
         }
     }
     return -1;
+}
+
+inline void replaceTokens(
+        std::vector<std::shared_ptr<Token>> &tokenTree,
+        const std::size_t &start, const std::size_t &end,
+        const std::shared_ptr<CompoundToken> &newTokenPtr) {
+    tokenTree.insert(
+        tokenTree.begin() + start,
+        std::dynamic_pointer_cast<Token>(newTokenPtr)
+    );
+    tokenTree.erase(
+        tokenTree.begin() + start + 1,
+        tokenTree.begin() + end + 1
+    );
+}
+
+inline void throwUnexpectedTokenException(
+        const std::string &currTreeStr,
+        const std::vector<std::shared_ptr<Token>> &tokenTree) {
+    std::shared_ptr<Token> currToken = tokenTree.at(
+        nonStatementIndex(currTreeStr)
+    );
+    while(!currToken->isSymbol()) {
+        currToken = std::dynamic_pointer_cast<CompoundToken>(
+            currToken
+        )->children[0];
+    }
+    auto symbolPtr = std::dynamic_pointer_cast<SymbolToken>(currToken);
+    const auto symbol = *symbolPtr;
+    throw UnexpectedTokenException(symbol, currTreeStr);
 }
 
 const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
@@ -145,31 +182,14 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
                         )
                     )
                 );
-                tokenTree.insert(
-                    tokenTree.begin() + matchLocation,
-                    std::dynamic_pointer_cast<Token>(newTokenPtr)
-                );
-                tokenTree.erase(
-                    tokenTree.begin() + matchLocation + 1,
-                    tokenTree.begin() + matchEnd + 1
-                );
+                replaceTokens(tokenTree, matchLocation, matchEnd, newTokenPtr);
                 
                 currTreeStr = Token::tokenListAsTypeStr(tokenTree);
             }
         }
         
         if(currTreeStr == oldStr) {
-            std::shared_ptr<Token> currToken = tokenTree.at(
-                nonStatementIndex(currTreeStr)
-            );
-            while(!currToken->isSymbol()) {
-                currToken = std::dynamic_pointer_cast<CompoundToken>(
-                    currToken
-                )->children[0];
-            }
-            auto symbolPtr = std::dynamic_pointer_cast<SymbolToken>(currToken);
-            const auto symbol = *symbolPtr;
-            throw UnexpectedTokenException(symbol, currTreeStr);
+            throwUnexpectedTokenException(currTreeStr, tokenTree);
         }
     }
     
