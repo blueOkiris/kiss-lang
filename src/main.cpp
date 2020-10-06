@@ -20,7 +20,7 @@ inline void compileSourceCode(
 int main(int argc, char **args) {
     std::string sourceCode;
     std::string moduleName;
-    if(Io::sourceCodeFromArgs(sourceCode, moduleName, argc, args)) {
+    if(Io::sourceCodeFromArgs(sourceCode, moduleName, argc, args) != 0) {
         return -1;
     }
     
