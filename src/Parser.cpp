@@ -56,25 +56,26 @@ static const std::vector<std::pair<std::string, CompoundTokenType>>
 const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
     std::vector<SymbolToken> tokens;
     int line = 1, col = 1;
-    for(auto codeIt = code.begin(); codeIt != code.end(); ++codeIt) {
-        if(*codeIt == ' ' || *codeIt == '\t' || *codeIt == '\r') {
+    for(auto codeStrIter = code.begin();
+            codeStrIter != code.end();
+            ++codeStrIter) {
+        if(*codeStrIter == ' ' || *codeStrIter == '\t' 
+                || *codeStrIter == '\r') {
             continue;
-        } else if(*codeIt == '\n') {
+        } else if(*codeStrIter == '\n') {
             line++;
             col = 1;
             continue;
         }
         
-        const auto currStr = std::string(codeIt, code.end());
+        const auto currStr = std::string(codeStrIter, code.end());
         bool foundMatches = false;
-        for(auto regexTokenPairIt = symbolRegexs.begin();
-                regexTokenPairIt != symbolRegexs.end(); ++regexTokenPairIt) {
+        for(auto regexTokenPairIter = symbolRegexs.begin();
+                regexTokenPairIter != symbolRegexs.end();
+                ++regexTokenPairIter) {
             std::smatch matches;
-            const auto regexStr = regexTokenPairIt->first;
-            const std::regex currRegex(regexStr);
-            foundMatches = std::regex_search(
-                currStr, matches, currRegex
-            );
+            const std::regex currRegex(regexTokenPairIter->first);
+            foundMatches = std::regex_search(currStr, matches, currRegex);
             if(foundMatches) {
                 const auto matchStr = matches[0].str();
                 
@@ -82,16 +83,15 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
                 if(currStr.rfind(matchStr, 0) == 0) {
                     tokens.push_back(
                         SymbolToken(
-                            regexTokenPairIt->second, matchStr, { line, col }
+                            regexTokenPairIter->second, matchStr, { line, col }
                         )
                     );
-                    codeIt += matchStr.length();
+                    codeStrIter += matchStr.length();
                     col += matchStr.length();
                     break;
                 }
             }
         }
-        
         if(!foundMatches) {
             throw UnknownTokenException(line, col);
         }
@@ -112,6 +112,7 @@ inline const bool allStatements(const std::string &str) {
 const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
     std::vector<std::shared_ptr<Token>> tokenTree;
     
+    // Fill with copies of symbols to start
     for(auto tokenIt = tokens.begin(); tokenIt != tokens.end(); ++tokenIt) {
         const auto symbolPtr = std::make_shared<SymbolToken>(*tokenIt);
         tokenTree.push_back(std::dynamic_pointer_cast<Token>(symbolPtr));
@@ -120,19 +121,21 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
     auto currTreeStr = Token::tokenListAsTypeStr(tokenTree);
     while(!allStatements(currTreeStr)) {
         const auto oldStr = currTreeStr;
-        for(auto regexTokenPairIt = compoundRegexs.begin();
-                regexTokenPairIt != compoundRegexs.end(); ++regexTokenPairIt) {
+        
+        for(auto regexTokenPairIter = compoundRegexs.begin();
+                regexTokenPairIter != compoundRegexs.end();
+                ++regexTokenPairIter) {
             std::smatch matches;
-            const auto regexStr = regexTokenPairIt->first;
-            const std::regex currRegex(regexStr);
+            const std::regex currRegex(regexTokenPairIter->first);
             
             while(std::regex_search(currTreeStr, matches, currRegex)) {
                 const auto match = matches[0];
                 const auto matchLocation = currTreeStr.find(match.str());
                 const auto matchEnd = matchLocation + match.str().length();
+                
                 const auto newTokenPtr = std::make_shared<CompoundToken>(
                     CompoundToken(
-                        regexTokenPairIt->second,
+                        regexTokenPairIter->second,
                         std::vector<std::shared_ptr<Token>>(
                             tokenTree.begin() + matchLocation,
                             tokenTree.begin() + matchEnd
@@ -147,12 +150,15 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
                     tokenTree.begin() + matchLocation + 1,
                     tokenTree.begin() + matchEnd + 1
                 );
+                
                 currTreeStr = Token::tokenListAsTypeStr(tokenTree);
             }
         }
+        
         if(currTreeStr == oldStr) {
             throw UnexpectedTokenException(currTreeStr);
         }
     }
+    
     return CompoundToken(CompoundTokenType::Program, tokenTree);
 }
