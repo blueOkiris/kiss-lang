@@ -4,7 +4,7 @@ using namespace kisslang;
 
 
 const std::string Compiler::generateCode(const CompoundToken &ast) {
-    return "";    
+    return "";
 }
 
 void Compiler::compile(
