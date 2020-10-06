@@ -23,6 +23,7 @@ int main(int argc, char **args) {
     if(Io::sourceCodeFromArgs(sourceCode, moduleName, argc, args)) {
         return -1;
     }
+    
     std::cout << "Compiling module " << moduleName << "." << std::endl;
     try {
         compileSourceCode(sourceCode, moduleName);
@@ -33,5 +34,6 @@ int main(int argc, char **args) {
         std::cout << ute.what() << std::endl;
         return -1;
     }
+    
     return 0;
 }
