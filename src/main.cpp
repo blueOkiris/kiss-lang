@@ -35,9 +35,13 @@ const int compileSourceCode(
     try {
         const auto tokens = Parser::lexTokens(source);
         const auto ast = Parser::parseAst(tokens);
+        std::cout << ast.str() << std::endl;
         const auto cppCode = Compiler::generateCode(ast);
         Compiler::compile(moduleName, cppCode);
     } catch(const UnknownTokenException &ute) {
+        std::cout << ute.what() << std::endl;
+        return -1;
+    } catch(const UnexpectedTokenException &ute) {
         std::cout << ute.what() << std::endl;
         return -1;
     }

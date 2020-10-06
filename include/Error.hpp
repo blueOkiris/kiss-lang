@@ -17,4 +17,8 @@ namespace kisslang {
     struct UnknownTokenException : public SmoochException {
         UnknownTokenException(int line, int col);
     };
+    
+    struct UnexpectedTokenException : public SmoochException {
+        UnexpectedTokenException(std::string tokenStr);
+    };
 }

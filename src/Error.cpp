@@ -26,3 +26,9 @@ const char *SmoochException::what() const throw() {
 UnknownTokenException::UnknownTokenException(int line, int col) :
         SmoochException("Unknown token", line, col) {
 }
+
+UnexpectedTokenException::UnexpectedTokenException(std::string tokenStr) :
+        SmoochException(
+            "Unexpected token (see token str \"" + tokenStr + "\")", 0, 0
+        ) {
+}

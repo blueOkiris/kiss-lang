@@ -1,8 +1,8 @@
 #include <string>
 #include <vector>
 #include <regex>
-#include <map>
 #include <iostream>
+#include <utility>
 #include <memory>
 #include <Error.hpp>
 #include <Token.hpp>
@@ -10,7 +10,9 @@
 
 using namespace kisslang;
 
-static const std::map<std::string, SymbolTokenType> symbolRegexs = {
+// Can't use map for these because it MUST be in the correct order
+static const std::vector<std::pair<std::string, SymbolTokenType>>
+        symbolRegexs = {
     { "loop|func|struct",                   SymbolTokenType::Keyword },
     { "true|false",                         SymbolTokenType::Boolean },
     {
@@ -34,14 +36,15 @@ static const std::map<std::string, SymbolTokenType> symbolRegexs = {
     { "::",                                 SymbolTokenType::TypeOp },
     { "\\.",                                SymbolTokenType::MemberOp }
 };
-
-static const std::map<std::string, CompoundTokenType> compoundRegexs = {
+static const std::vector<std::pair<std::string, CompoundTokenType>> 
+        compoundRegexs = {
     { "[bic'nf]",                   CompoundTokenType::RawType },
     { "\\(tt\\(",                   CompoundTokenType::Tuple },
     { "\\[t+\\[",                   CompoundTokenType::List },
     { "\\(n\\(\\{t*\\{",            CompoundTokenType::Struct },
     { "n(\\.n)+",                   CompoundTokenType::StructAccess },
-    { "[r,lsS]",                    CompoundTokenType::TypeName },
+    { "[r,lsS]",                    CompoundTokenType::Type },
+    { "[@n]|(\\(NN\\()|(\\[N\\[)",  CompoundTokenType::TypeName },
     { "\\{I*\\{",                   CompoundTokenType::Body },
     { "kn:N>N",                     CompoundTokenType::FuncDef },
     { "k\\}",                       CompoundTokenType::Loop },
@@ -94,13 +97,16 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
         }
         col++;
     }
-    
-    std::cout << "Lexed Tokens: " << std::endl;
-    for(const auto token : tokens) {
-        std::cout << token.str() << std::endl;
-    }
-    
     return tokens;
+}
+
+inline const bool allStatements(const std::string &str) {
+    for(const auto chr : str) {
+        if(chr != 'I') {
+            return false;
+        }
+    }
+    return true;
 }
 
 const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
@@ -111,10 +117,42 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
         tokenTree.push_back(std::dynamic_pointer_cast<Token>(symbolPtr));
     }
     
-    for(auto regexTokenPairIt = compoundRegexs.begin();
-            regexTokenPairIt != compoundRegexs.end(); ++regexTokenPairIt) {
-        const auto currTreeStr = Token::tokenListAsTypeStr(tokenTree);
-        std::cout << currTreeStr << std::endl;
+    auto currTreeStr = Token::tokenListAsTypeStr(tokenTree);
+    while(!allStatements(currTreeStr)) {
+        const auto oldStr = currTreeStr;
+        for(auto regexTokenPairIt = compoundRegexs.begin();
+                regexTokenPairIt != compoundRegexs.end(); ++regexTokenPairIt) {
+            std::smatch matches;
+            const auto regexStr = regexTokenPairIt->first;
+            const std::regex currRegex(regexStr);
+            
+            while(std::regex_search(currTreeStr, matches, currRegex)) {
+                const auto match = matches[0];
+                const auto matchLocation = currTreeStr.find(match.str());
+                const auto matchEnd = matchLocation + match.str().length();
+                const auto newTokenPtr = std::make_shared<CompoundToken>(
+                    CompoundToken(
+                        regexTokenPairIt->second,
+                        std::vector<std::shared_ptr<Token>>(
+                            tokenTree.begin() + matchLocation,
+                            tokenTree.begin() + matchEnd
+                        )
+                    )
+                );
+                tokenTree.insert(
+                    tokenTree.begin() + matchLocation,
+                    std::dynamic_pointer_cast<Token>(newTokenPtr)
+                );
+                tokenTree.erase(
+                    tokenTree.begin() + matchLocation + 1,
+                    tokenTree.begin() + matchEnd + 1
+                );
+                currTreeStr = Token::tokenListAsTypeStr(tokenTree);
+            }
+        }
+        if(currTreeStr == oldStr) {
+            throw UnexpectedTokenException(currTreeStr);
+        }
     }
     return CompoundToken(CompoundTokenType::Program, tokenTree);
 }
