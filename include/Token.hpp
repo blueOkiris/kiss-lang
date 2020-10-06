@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <utility>
 
 /*
@@ -20,7 +21,11 @@
 namespace kisslang {
     
     struct Token {
-        virtual std::string str() const;
+        virtual const bool isSymbol() const = 0;
+        virtual const std::string str() const = 0;
+        static const std::string tokenListAsTypeStr(
+            const std::vector<std::shared_ptr<Token>> &tokens
+        );
     };
     
     enum class SymbolTokenType {
@@ -43,7 +48,8 @@ namespace kisslang {
             const SymbolTokenType &type, const std::string &value,
             const std::pair<int, int> &position
         );
-        std::string str() const override;
+        const bool isSymbol() const override;
+        const std::string str() const override;
     };
     
     enum class CompoundTokenType {
@@ -58,11 +64,13 @@ namespace kisslang {
     
     struct CompoundToken : public Token {
         const CompoundTokenType type;
-        const std::vector<Token> children;
+        const std::vector<std::shared_ptr<Token>> children;
         
         CompoundToken(
-            const CompoundTokenType &newType, const std::vector<Token> &tokens
+            const CompoundTokenType &newType,
+            const std::vector<std::shared_ptr<Token>> &tokens
         );
-        std::string str() const override;
+        const bool isSymbol() const override;
+        const std::string str() const override;
     };
 }

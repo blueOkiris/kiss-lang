@@ -3,6 +3,7 @@
 #include <regex>
 #include <map>
 #include <iostream>
+#include <memory>
 #include <Error.hpp>
 #include <Token.hpp>
 #include <Parser.hpp>
@@ -103,7 +104,17 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
 }
 
 const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
-    return CompoundToken(
-        CompoundTokenType::None, std::vector<Token>()
-    );
+    std::vector<std::shared_ptr<Token>> tokenTree;
+    
+    for(auto tokenIt = tokens.begin(); tokenIt != tokens.end(); ++tokenIt) {
+        const auto symbolPtr = std::make_shared<SymbolToken>(*tokenIt);
+        tokenTree.push_back(std::dynamic_pointer_cast<Token>(symbolPtr));
+    }
+    
+    for(auto regexTokenPairIt = compoundRegexs.begin();
+            regexTokenPairIt != compoundRegexs.end(); ++regexTokenPairIt) {
+        const auto currTreeStr = Token::tokenListAsTypeStr(tokenTree);
+        std::cout << currTreeStr << std::endl;
+    }
+    return CompoundToken(CompoundTokenType::Program, tokenTree);
 }
