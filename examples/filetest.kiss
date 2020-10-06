@@ -1,0 +1,2 @@
+'test.txt' 'testing 1 2 3\n' write
+'test.txt' read print

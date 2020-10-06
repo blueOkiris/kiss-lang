@@ -1,0 +1,9 @@
+func factorial :: # -> # {
+    dup 1 == loop {
+        return
+    }
+    dup 1 - factorial * return
+}
+
+input <<[@]>> factorial
+print '\n' print

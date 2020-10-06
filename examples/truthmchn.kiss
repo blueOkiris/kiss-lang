@@ -1,0 +1,6 @@
+input <<#>>
+dup 1 == loop {
+    dup print
+    dup 1 ==
+}
+print '\n' print

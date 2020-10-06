@@ -1,0 +1,27 @@
+func beerOnTheWall :: # -> [@] {
+    <<[@]>> ' bottles of beer on the wall.\n' ++ return
+}
+
+func beer :: # -> [@] {
+    <<[@]>> ' bottles of beer.' ++ return
+}
+
+'99 bottles of beer on the wall.\n 99 bottles of beer.\n'
+'Take one down pass it around.\n' ++
+print
+
+99 99 2 == loop {
+    1 - dup beerOnTheWall '\n' ++ swap
+    dup beerOnTheWall swap rot ++ swap
+    dup beer swap rot ++ swap
+    'Take one down pass it around.\n' swap rot ++
+    print
+    dup 2 ==
+}
+
+'1 bottle of beer on the wall.\n'
+'\n1 bottle of beer on the wall.\n1 bottle of beer.\n' ++
+'Take one down pass it around.\n' ++
+'No more bottles of beer on the wall.\n' ++
+
+print
