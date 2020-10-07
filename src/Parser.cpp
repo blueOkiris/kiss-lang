@@ -65,38 +65,42 @@ inline bool shouldSkipSpaces(const char &chr, int &lineRef, int &colRef) {
     return false;
 }
 
+inline const std::string matchRegEx(
+        const std::string &regexStr, const std::string &currStr,
+        bool &foundMatches) {
+    std::smatch matches;
+    const std::regex currRegex(regexStr);
+    foundMatches = std::regex_search(currStr, matches, currRegex);
+    return matches[0].str();
+}
+
+inline const bool startswith(const std::string &str, const std::string &what) {
+    return str.rfind(what, 0) == 0;
+}
+
 const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
     std::vector<SymbolToken> tokens;
     int line = 1, col = 1;
-    for(auto codeStrIter = code.begin();
-            codeStrIter != code.end();
-            ++codeStrIter) {
-        if(shouldSkipSpaces(*codeStrIter, line, col)) {
+    for(auto codeIt = code.begin(); codeIt != code.end(); ++codeIt) {
+        if(shouldSkipSpaces(*codeIt, line, col)) {
             continue;
         }
         
-        const auto currStr = std::string(codeStrIter, code.end());
         bool foundMatches = false;
-        for(auto regexTokenPairIter = symbolRegexs.begin();
-                regexTokenPairIter != symbolRegexs.end();
-                ++regexTokenPairIter) {
-            std::smatch matches;
-            const std::regex currRegex(regexTokenPairIter->first);
-            foundMatches = std::regex_search(currStr, matches, currRegex);
-            if(foundMatches) {
-                const auto matchStr = matches[0].str();
-                
-                // If currStr."startswith"(first match string)
-                if(currStr.rfind(matchStr, 0) == 0) {
-                    tokens.push_back(
-                        SymbolToken(
-                            regexTokenPairIter->second, matchStr, { line, col }
-                        )
-                    );
-                    codeStrIter += matchStr.length() - 1;
-                    col += matchStr.length() - 1;
-                    break;
-                }
+        const auto currStr = std::string(codeIt, code.end());
+        for(auto regex2TokenIt = symbolRegexs.begin();
+                regex2TokenIt != symbolRegexs.end(); ++regex2TokenIt) {
+            const auto matchStr = matchRegEx(
+                regex2TokenIt->first, currStr,
+                foundMatches
+            );
+            if(foundMatches && startswith(currStr, matchStr)) {
+                tokens.push_back(
+                    SymbolToken(regex2TokenIt->second, matchStr, { line, col })
+                );
+                codeIt += matchStr.length() - 1;
+                col += matchStr.length() - 1;
+                break;
             }
         }
         
