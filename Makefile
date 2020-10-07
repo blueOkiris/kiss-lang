@@ -1,7 +1,7 @@
 # Build options
 OBJNAME :=  smooch
 CPPC :=     g++
-CPPFLAGS := -g -Wall -Werror --std=c++17
+CPPFLAGS := -O2 -Wall -Werror --std=c++17
 
 
 # Auto stuff and helper rules

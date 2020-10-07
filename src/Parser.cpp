@@ -62,15 +62,10 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
         
         bool foundMatches = false;
         const auto currStr = std::string(codeStrIt, code.end());
-        for(const auto &regexTokenPair : symbolRegexs) {
-            const auto matchStr = matchRegEx(
-                regexTokenPair.first, currStr,
-                foundMatches
-            );
+        for(const auto &[regexStr, type] : symbolRegexs) {
+            const auto matchStr = matchRegEx(regexStr, currStr, foundMatches);
             if(foundMatches && startswith(currStr, matchStr)) {
-                tokens.push_back(
-                    SymbolToken(regexTokenPair.second, matchStr, { line, col })
-                );
+                tokens.push_back(SymbolToken(type, matchStr, { line, col }));
                 codeStrIt += matchStr.length() - 1;
                 col += matchStr.length() - 1;
                 break;
@@ -95,13 +90,13 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
         const auto oldStr = currTreeStr;
         
         std::string matchStr;
-        for(const auto &regexTokenPair : compoundRegexs) {      
-            while(matchRegex(regexTokenPair.first, currTreeStr, matchStr)) {
+        for(const auto &[regexStr, tokenType] : compoundRegexs) {      
+            while(matchRegex(regexStr, currTreeStr, matchStr)) {
                 const auto matchStart = currTreeStr.find(matchStr);
                 const auto matchEnd = matchStart + matchStr.length();
                 const auto newTokenPtr = std::make_shared<CompoundToken>(
                     CompoundToken(
-                        regexTokenPair.second,
+                        tokenType,
                         std::vector<std::shared_ptr<Token>>(
                             tokenTree.begin() + matchStart,
                             tokenTree.begin() + matchEnd
