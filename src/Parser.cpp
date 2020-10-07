@@ -166,20 +166,19 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
     while(nonStatementIndex(currTreeStr) != -1) {
         const auto oldStr = currTreeStr;
         
-        for(auto regexTokenPairIter = compoundRegexs.begin();
-                regexTokenPairIter != compoundRegexs.end();
-                ++regexTokenPairIter) {
-            std::smatch matches;
-            const std::regex currRegex(regexTokenPairIter->first);
+        for(auto regex2TokenIt = compoundRegexs.begin();
+                regex2TokenIt != compoundRegexs.end(); ++regex2TokenIt) {
+            const std::regex currRegex(regex2TokenIt->first);
             
+            std::smatch matches;
             while(std::regex_search(currTreeStr, matches, currRegex)) {
-                const auto match = matches[0];
-                const auto matchLocation = currTreeStr.find(match.str());
-                const auto matchEnd = matchLocation + match.str().length();
+                const auto matchStr = matches[0].str();
+                const auto matchLocation = currTreeStr.find(matchStr);
+                const auto matchEnd = matchLocation + matchStr.length();
                 
                 const auto newTokenPtr = std::make_shared<CompoundToken>(
                     CompoundToken(
-                        regexTokenPairIter->second,
+                        regex2TokenIt->second,
                         std::vector<std::shared_ptr<Token>>(
                             tokenTree.begin() + matchLocation,
                             tokenTree.begin() + matchEnd
