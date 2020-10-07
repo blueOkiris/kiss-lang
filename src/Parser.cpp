@@ -71,10 +71,10 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
                 break;
             }
         }
-        
         if(!foundMatches) {
             throw UnknownTokenException(line, col);
         }
+        
         col++;
     }
     return tokens;
