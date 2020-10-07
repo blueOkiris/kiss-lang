@@ -66,6 +66,7 @@ inline bool shouldSkipSpaces(const char &chr, int &lineRef, int &colRef) {
     return false;
 }
 
+// The following two are the same idea, but work a bit differently with state
 inline const std::string matchRegEx(
         const std::string &regexStr, const std::string &currStr,
         bool &foundMatches) {
@@ -73,6 +74,16 @@ inline const std::string matchRegEx(
     const std::regex currRegex(regexStr);
     foundMatches = std::regex_search(currStr, matches, currRegex);
     return matches[0].str();
+}
+
+inline const bool matchRegex(
+        const std::string &regexStr, const std::string &currStr,
+        std::string &matchStr) {
+    std::smatch matches;
+    const std::regex currRegex(regexStr);
+    bool foundMatches = std::regex_search(currStr, matches, currRegex);
+    matchStr = matches[0].str();
+    return foundMatches;
 }
 
 inline const bool startswith(const std::string &str, const std::string &what) {
@@ -171,25 +182,22 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
     auto currTreeStr = Token::tokenListAsTypeStr(tokenTree);
     while(nonStatementIndex(currTreeStr) != -1) {
         const auto oldStr = currTreeStr;
-        
-        for(const auto &regexTokenPair : compoundRegexs) {
-            const std::regex currRegex(regexTokenPair.first);
-            
-            std::smatch matches;
-            while(std::regex_search(currTreeStr, matches, currRegex)) {
-                const auto matchStr = matches[0].str();
-                const auto matchLocation = currTreeStr.find(matchStr);
-                const auto matchEnd = matchLocation + matchStr.length();
+              
+        std::string matchStr;
+        for(const auto &regexTokenPair : compoundRegexs) {      
+            while(matchRegex(regexTokenPair.first, currTreeStr, matchStr)) {
+                const auto matchStart = currTreeStr.find(matchStr);
+                const auto matchEnd = matchStart + matchStr.length();
                 const auto newTokenPtr = std::make_shared<CompoundToken>(
                     CompoundToken(
                         regexTokenPair.second,
                         std::vector<std::shared_ptr<Token>>(
-                            tokenTree.begin() + matchLocation,
+                            tokenTree.begin() + matchStart,
                             tokenTree.begin() + matchEnd
                         )
                     )
                 );
-                replaceTokens(tokenTree, matchLocation, matchEnd, newTokenPtr);
+                replaceTokens(tokenTree, matchStart, matchEnd, newTokenPtr);
                 currTreeStr = Token::tokenListAsTypeStr(tokenTree);
             }
         }
