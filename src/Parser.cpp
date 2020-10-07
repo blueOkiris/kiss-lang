@@ -93,7 +93,7 @@ const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
     auto currTreeStr = Token::tokenListAsTypeStr(tokenTree);
     while(nonStatementIndex(currTreeStr) != -1) {
         const auto oldStr = currTreeStr;
-              
+        
         std::string matchStr;
         for(const auto &regexTokenPair : compoundRegexs) {      
             while(matchRegex(regexTokenPair.first, currTreeStr, matchStr)) {
