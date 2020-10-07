@@ -53,6 +53,7 @@ static const std::vector<std::pair<std::string, CompoundTokenType>>
     { "k\\{(n:N)*\\{",                  CompoundTokenType::StructDef }
 };
 
+// Helper functions
 inline bool shouldSkipSpaces(const char &chr, int &lineRef, int &colRef) {
     if(chr == ' ' || chr == '\t' || chr == '\r') {
         colRef++;
@@ -119,6 +120,7 @@ inline void throwUnexpectedTokenException(
     throw UnexpectedTokenException(symbol, currTreeStr);
 }
 
+// Main parser functions
 const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
     std::vector<SymbolToken> tokens;
     int line = 1, col = 1;
