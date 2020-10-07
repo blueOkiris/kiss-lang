@@ -120,6 +120,15 @@ inline void throwUnexpectedTokenException(
     throw UnexpectedTokenException(symbol, currTreeStr);
 }
 
+inline void copySymbolTokensToParentPtrs(
+        std::vector<std::shared_ptr<Token>> &dest,
+        const std::vector<SymbolToken> &src) {
+    for(auto tokenIt = src.begin(); tokenIt != src.end(); ++tokenIt) {
+        const auto symbolPtr = std::make_shared<SymbolToken>(*tokenIt);
+        dest.push_back(std::dynamic_pointer_cast<Token>(symbolPtr));
+    }
+}
+
 // Main parser functions
 const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
     std::vector<SymbolToken> tokens;
@@ -155,13 +164,9 @@ const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
 }
 
 const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
+    // Generate starting list
     std::vector<std::shared_ptr<Token>> tokenTree;
-    
-    // Fill with copies of symbols to start
-    for(auto tokenIt = tokens.begin(); tokenIt != tokens.end(); ++tokenIt) {
-        const auto symbolPtr = std::make_shared<SymbolToken>(*tokenIt);
-        tokenTree.push_back(std::dynamic_pointer_cast<Token>(symbolPtr));
-    }
+    copySymbolTokensToParentPtrs(tokenTree, tokens);
     
     auto currTreeStr = Token::tokenListAsTypeStr(tokenTree);
     while(nonStatementIndex(currTreeStr) != -1) {
