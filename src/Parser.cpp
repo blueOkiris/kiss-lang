@@ -78,40 +78,6 @@ inline const bool startswith(const std::string &str, const std::string &what) {
     return str.rfind(what, 0) == 0;
 }
 
-const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
-    std::vector<SymbolToken> tokens;
-    int line = 1, col = 1;
-    for(auto codeIt = code.begin(); codeIt != code.end(); ++codeIt) {
-        if(shouldSkipSpaces(*codeIt, line, col)) {
-            continue;
-        }
-        
-        bool foundMatches = false;
-        const auto currStr = std::string(codeIt, code.end());
-        for(auto regex2TokenIt = symbolRegexs.begin();
-                regex2TokenIt != symbolRegexs.end(); ++regex2TokenIt) {
-            const auto matchStr = matchRegEx(
-                regex2TokenIt->first, currStr,
-                foundMatches
-            );
-            if(foundMatches && startswith(currStr, matchStr)) {
-                tokens.push_back(
-                    SymbolToken(regex2TokenIt->second, matchStr, { line, col })
-                );
-                codeIt += matchStr.length() - 1;
-                col += matchStr.length() - 1;
-                break;
-            }
-        }
-        
-        if(!foundMatches) {
-            throw UnknownTokenException(line, col);
-        }
-        col++;
-    }
-    return tokens;
-}
-
 inline const long int nonStatementIndex(const std::string &str) {
     for(long int ind = 0; ind < static_cast<long int>(str.length()); ind++) {
         const auto chr = str[ind];
@@ -151,6 +117,40 @@ inline void throwUnexpectedTokenException(
     auto symbolPtr = std::dynamic_pointer_cast<SymbolToken>(currToken);
     const auto symbol = *symbolPtr;
     throw UnexpectedTokenException(symbol, currTreeStr);
+}
+
+const std::vector<SymbolToken> Parser::lexTokens(const std::string &code) {
+    std::vector<SymbolToken> tokens;
+    int line = 1, col = 1;
+    for(auto codeIt = code.begin(); codeIt != code.end(); ++codeIt) {
+        if(shouldSkipSpaces(*codeIt, line, col)) {
+            continue;
+        }
+        
+        bool foundMatches = false;
+        const auto currStr = std::string(codeIt, code.end());
+        for(auto regex2TokenIt = symbolRegexs.begin();
+                regex2TokenIt != symbolRegexs.end(); ++regex2TokenIt) {
+            const auto matchStr = matchRegEx(
+                regex2TokenIt->first, currStr,
+                foundMatches
+            );
+            if(foundMatches && startswith(currStr, matchStr)) {
+                tokens.push_back(
+                    SymbolToken(regex2TokenIt->second, matchStr, { line, col })
+                );
+                codeIt += matchStr.length() - 1;
+                col += matchStr.length() - 1;
+                break;
+            }
+        }
+        
+        if(!foundMatches) {
+            throw UnknownTokenException(line, col);
+        }
+        col++;
+    }
+    return tokens;
 }
 
 const CompoundToken Parser::parseAst(const std::vector<SymbolToken> &tokens) {
