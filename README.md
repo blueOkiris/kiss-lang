@@ -151,9 +151,29 @@ So here's the symbol tokens ebnf with the characters:
 
 ## Compiler Domain Diagram
 
-I'm using Haskell, not an OOP language, but classes without private state can act as modules containing functions and thus translate directly to functional code structure (or possibly a type)
-
-This will help me plan my project.
+This will help me plan my project. It is not 100% accurate to the actual structure of the project.
 
 ![kiss-lang domain model](docs/kiss-lang-domain.png)
 
+## Built-in Functions
+
+The builtin functions for things like math and stack stuff will be taken mostly from snake script or the defined operators.
+
+They are:
+
+| Name | Description |
+|:-:|:-:|
+| return | Pops the current value off of the stack and returns it from a function. Throws type error and stack underflow.
+| pop | Pops off the top of the stack. Throws stack underflow |
+| dup | Duplicates the current item on the stack. Throws stack underflow |
+| swap | Swaps the top two items on the stack. Throws stack underflow |
+| ++ | Either: 1) pops a numeric value and returns it incremented by 1 or 2) pops two lists and returns a list of their concatenation. Can throw type error or stack underflow.
+| -- | Either: 1) pop numerical and return its decrement or 2) pop a list and then an integer, and push a list with the value at the index indicated by the number removed. Throws type error, stack underflow, or index out of bounds |
+| at | Pop list and then pop number. Return the value in the list indexed by the number. Throws type error, stack underflow, or index out of bounds. |
+| unzip | Pop a list and push all of its values onto the stack. Throws type error or stack underflow |
+| zip | Pop all items of the same type off the stack, and push them into a single list |
+| round | Pop a floating point number off of the stack and push it rounded as a 64 bit integer. Throws type error or stack underflow |
+| print | Pop an item off the stack and print its value. Throws stack underflow |
+| input | Read a value from stdin and push its value as a string |
+| write | Pop a filename (string) off the stack and a value. Write the value to the file. Throws type error or stack underflow |
+| read | Pop a filename (string) off the stack. Push the contents of the file to the stack as a string. Throws type error or stack underflow |
